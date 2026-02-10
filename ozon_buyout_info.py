@@ -51,7 +51,7 @@ data_result = response.json()["result"]["data"]
 
 url = "https://api-seller.ozon.ru/v4/product/info/attributes"
 
-offer_id = ['Kickscooter MAX G2']
+offer_id = ['HC905-Black']
 
 payload = {
   "filter": {

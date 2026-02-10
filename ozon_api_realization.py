@@ -1,18 +1,19 @@
 import requests  # ignore
-from http import HTTPStatus
-import json
+# from http import HTTPStatus
+# import json
 import pandas as pd
+import pandas.io.formats.excel
 
-import locale
-import datetime
-from datetime import date, timedelta, datetime
+
+# import locale
+# import datetime
+from datetime import timedelta, datetime
 import sqlite3
 
+# pandas.io.formats.excel.ExcelFormatter.header_style = None
 
 client_id = '11777'
 api_key = '7cbbd14f-36d7-4611-80c5-69e359347dd0'
-
-
 
 
 def realization_by_day(day, month, year):
@@ -20,7 +21,7 @@ def realization_by_day(day, month, year):
     url = 'https://api-seller.ozon.ru/v1/finance/realization/by-day'
 
     payload = {
-        "day": day,  
+        "day": day,
         "month": month,
         "year": year,
     }
@@ -32,8 +33,9 @@ def realization_by_day(day, month, year):
     }
 
     response = requests.post(url, json=payload, headers=headers)
-    print(response.json(), '\n\n')
+    # print(response.json(), '\n\n')
     return response.json()['rows']
+
 
 def brand_name(offer_id):
 
@@ -45,35 +47,31 @@ def brand_name(offer_id):
         "Content-Type": "application/json"
     }
 
-    # offer_id = ['Kickscooter MAX G2']
-
     payload = {
-    "filter": {
-        "offer_id": offer_id,
-        "visibility": "ALL"
-    },
-    "limit": 1,
-    "sort_dir": "ASC"
+        "filter": {
+            "offer_id": [offer_id],
+            "visibility": "ALL"
+        },
+        "limit": 1,
+        "sort_dir": "ASC"
     }
 
     response = requests.post(url, json=payload, headers=headers)
 
-    print('----------------------------------------------------')
-    print(response.json())
+    # print('----------------------------------------------------')
+    # print(response.json())
 
     data_result = response.json()['result'][0]['attributes']
-    
+
     for item in data_result:
         # print(item)
         # print(item['id'])
         if item['id'] == 85:
             brand_name = item['values'][0]['value']
-            print(brand_name)
+            # print(brand_name)
             break
 
     return brand_name
-
-
 
 
 date_start = '2026-02-01'
@@ -89,50 +87,33 @@ dt_end = datetime.strptime(date_end, '%Y-%m-%d')
 con = sqlite3.connect('db.sqlite')
 cur = con.cursor()
 
-cur.execute('''DROP TABLE realization''')
+cur.execute('''DROP TABLE IF EXISTS realization''')
 con.commit()
 
 cur.execute('''
 CREATE TABLE IF NOT EXISTS realization(
-    brand,
+    brand TEXT,
     name TEXT,
     offer_id TEXT,
     barcode TEXT,
     sku INT,
-    date_re TEXT            
+    date_re TEXT
 );
 ''')
 
 con.commit()
 
 
-
-
-# cur.execute('''
-# INSERT INTO realization(
-#     name,
-#     offer_id,
-#     barcode,
-#     sku,
-#     date_re
-# VALUES()
-# );
-# ''')
-
 dt = dt_start
 while dt <= dt_end:
-    print(dt)
-    
-    
-    year, month, day = datetime.strftime(dt, '%Y-%m-%d').split('-')
-    print(int(day), int(month), int(year))
-    result = realization_by_day(int(day), int(month), int(year))
 
-    # print(result)
+    year, month, day = datetime.strftime(dt, '%Y-%m-%d').split('-')
+    # print(int(day), int(month), int(year))
+    result = realization_by_day(int(day), int(month), int(year))
 
     for item in result:
         # print(item, '\n')
-        print('Barcode = /'+item['item']['barcode']+'/')
+        # print('Barcode = /'+item['item']['barcode']+'/')
         name = item['item']['name']
         offer_id = item['item']['offer_id']
         barcode = item['item']['barcode']
@@ -144,13 +125,14 @@ while dt <= dt_end:
         date_re = datetime.strftime(dt, '%Y-%m-%d')
         brand = brand_name(offer_id)
 
-        print(name,
-            offer_id,
-            barcode,
-            sku,
-            date_re,
-            '\n'
-        )
+        # print(
+        #     name,
+        #     offer_id,
+        #     barcode,
+        #     sku,
+        #     date_re,
+        #     '\n'
+        # )
 
         cur.execute('''
             INSERT INTO realization(
@@ -170,14 +152,76 @@ while dt <= dt_end:
                 '''+"'"+date_re+"'"+'''
             );
             ''')
-            
+
         con.commit()
 
     dt += timedelta(days=1)
 
 
+# cur.execute('''
+# SELECT *
+# FROM realization
+# ORDER BY brand;
+# ''')
+
+# for result in cur:
+#     print(result)
 
 
+# cur.execute('''
+# SELECT brand, COUNT(brand)
+# FROM realization
+# GROUP BY brand
+# ORDER BY COUNT(brand) DESC;
+# ''')
 
+# for result in cur:
+#     print(result)
+
+df_all = pd.read_sql_query(
+    '''
+    SELECT *
+    FROM realization
+    ORDER BY date_re;
+    ''', con
+)
+
+df_brands = pd.read_sql_query(
+    '''
+    SELECT brand, COUNT(brand)
+    FROM realization
+    GROUP BY brand
+    ORDER BY COUNT(brand) DESC;
+    ''', con
+)
+
+print(df_all)
+print(df_brands)
 
 con.close()
+
+# writer = pd.ExcelWriter(
+#     'result\\brands_re.xlsx',
+#     engine='xlsxwriter',
+#     engine_kwargs={'options': {'strings_to_urls': False}}
+# )
+
+# df_brands.to_excel(writer, index=False, sheet_name='Бренды')
+# df_all.to_excel(writer, index=False, sheet_name='Всего реализовано')
+
+# workbook = writer.book
+# worksheet = writer.sheets['Бренды']
+
+
+with pd.ExcelWriter('result\\brands_re.xlsx') as writer:
+    df_brands.to_excel(writer, sheet_name='Бренды', index=False)
+    df_all.to_excel(writer, sheet_name='Всего реализовано', index=False)
+
+# header_fmt = workbook.add_format({'bold': True})
+# worksheet.set_row(0, 15, header_fmt)
+# worksheet.set_column(0, 0, 15)
+# worksheet.set_column(1, 1, 50)
+# worksheet.set_column(2, 2, 60)
+# worksheet.set_column(3, 3, 120)
+
+writer.save()  # type: ignore
