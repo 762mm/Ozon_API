@@ -1,18 +1,15 @@
 import requests  # ignore
-from http import HTTPStatus
-import json
-import pandas as pd
-
-import locale
-import datetime
+# from http import HTTPStatus
+# import json
+# import pandas as pd
+# import locale
+# import datetime
 
 
 client_id = '11777'
 api_key = '7cbbd14f-36d7-4611-80c5-69e359347dd0'
 
-
 url = "https://api-seller.ozon.ru/v1/analytics/data"
-
 
 date_start = '2026-01-15'
 date_end = '2026-01-15'
@@ -22,7 +19,6 @@ filters = []
 sort = []
 limit = 10
 offset = 0
-
 
 payload = {
     "date_from": date_start,  # Дата начала периода
@@ -41,13 +37,11 @@ headers = {
     "Content-Type": "application/json"
 }
 
-
 response = requests.post(url, json=payload, headers=headers)
 
 data_result = response.json()["result"]["data"]
 
 # print(data_result[1])
-
 
 url = "https://api-seller.ozon.ru/v4/product/info/attributes"
 
@@ -72,4 +66,3 @@ for item in data_result:
     if item['id'] == 85:
         print(item['values'][0]['value'])
         break
-
