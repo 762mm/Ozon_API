@@ -10,6 +10,7 @@ import datetime
 client_id = '11777'
 api_key = '7cbbd14f-36d7-4611-80c5-69e359347dd0'
 
+
 url = "https://api-seller.ozon.ru/v1/analytics/data"
 
 
@@ -45,6 +46,30 @@ response = requests.post(url, json=payload, headers=headers)
 
 data_result = response.json()["result"]["data"]
 
-print(data_result[1])
+# print(data_result[1])
 
+
+url = "https://api-seller.ozon.ru/v4/product/info/attributes"
+
+offer_id = ['Kickscooter MAX G2']
+
+payload = {
+  "filter": {
+    "offer_id": offer_id,
+    "visibility": "ALL"
+  },
+  "limit": 1,
+  "sort_dir": "ASC"
+}
+
+response = requests.post(url, json=payload, headers=headers)
+
+data_result = response.json()['result'][0]['attributes']
+
+for item in data_result:
+    print(item)
+    print(item['id'])
+    if item['id'] == 85:
+        print(item['values'][0]['value'])
+        break
 
