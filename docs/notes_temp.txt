@@ -1,0 +1,25 @@
+﻿11777
+7cbbd14f-36d7-4611-80c5-69e359347dd0
+
+https://docs.ozon.ru/api/seller/?__rr=1#operation/ReportAPI_CreateCompanyPostingsReport
+https://docs.ozon.ru/api/seller/?__rr=1#operation/ReportAPI_ReportInfo
+
+
+git config --global user.name "762mm"
+git config --global user.email "hans762@yandex.ru"
+
+
+git clone git@github.com:762mm/Ozon_API.git
+
+git add .
+git commit -m "test2"
+git push
+
+python -m venv venv
+source venv/Scripts/activate
+
+
+
+
+
+

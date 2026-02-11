@@ -1,4 +1,4 @@
-import requests  # ignore
+import requests
 # from http import HTTPStatus
 # import json
 import pandas as pd
@@ -12,8 +12,14 @@ import sqlite3
 
 # pandas.io.formats.excel.ExcelFormatter.header_style = None
 
+date_start = '2026-02-01'
+date_end = '2026-02-09'
+
 client_id = '11777'
 api_key = '7cbbd14f-36d7-4611-80c5-69e359347dd0'
+
+file_path = 'result//'
+file_name = 'realization_brands_'+date_start+'_'+date_end+'.xlsx'
 
 
 def realization_by_day(day, month, year):
@@ -72,10 +78,6 @@ def brand_name(offer_id):
             break
 
     return brand_name
-
-
-date_start = '2026-02-01'
-date_end = '2026-02-09'
 
 
 dt_start = datetime.strptime(date_start, '%Y-%m-%d')
@@ -200,20 +202,26 @@ print(df_brands)
 
 con.close()
 
-# writer = pd.ExcelWriter(
-#     'result\\brands_re.xlsx',
-#     engine='xlsxwriter',
-#     engine_kwargs={'options': {'strings_to_urls': False}}
-# )
+df_brands.rename(
+    columns={
+        'brand': 'Бренд',
+        'COUNT(brand)': 'Реализовано за период, шт.'
+    }
+    , inplace=True
+)
+df_all.rename(
+    columns={
+        'brand': 'Бренд',
+        'name': 'Наименование',
+        'offer_id': 'Артикул',
+        'barcode': 'Штрихкод',
+        'sku': 'SKU',
+        'date_re': 'Дата реализации'       
+    }
+    , inplace=True
+)
 
-# df_brands.to_excel(writer, index=False, sheet_name='Бренды')
-# df_all.to_excel(writer, index=False, sheet_name='Всего реализовано')
-
-# workbook = writer.book
-# worksheet = writer.sheets['Бренды']
-
-
-with pd.ExcelWriter('result\\brands_re.xlsx') as writer:
+with pd.ExcelWriter(file_path+file_name) as writer:
     df_brands.to_excel(writer, sheet_name='Бренды', index=False)
     df_all.to_excel(writer, sheet_name='Всего реализовано', index=False)
 
@@ -224,4 +232,5 @@ with pd.ExcelWriter('result\\brands_re.xlsx') as writer:
 # worksheet.set_column(2, 2, 60)
 # worksheet.set_column(3, 3, 120)
 
-writer.save()  # type: ignore
+# writer.save()  # type: ignore
+# writer.close()
