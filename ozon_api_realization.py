@@ -19,7 +19,7 @@ client_id = '11777'
 api_key = '7cbbd14f-36d7-4611-80c5-69e359347dd0'
 
 file_path = 'result//'
-file_name = 'realization_brands_'+date_start+'_'+date_end+'.xlsx'
+file_name = 'ozon_realization_brands_'+date_start+'_'+date_end+'.xlsx'
 
 
 def realization_by_day(day, month, year):
