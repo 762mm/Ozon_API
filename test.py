@@ -25,4 +25,6 @@ print(line_lst)
 # print(', '.join(line_lst))
 # print(str(line_lst))
 
-print(', '.join(['\''+i+'\'' for i in line_lst ]))
+print(', '.join(['\''+i+'\'' for i in line_lst ])+', \'\'')
+
+
